@@ -27,15 +27,18 @@ def initialize_database():
     """
     Create the database (if it doesn't exist) and run the SQL script.
     """
-    with engine.connect() as connection:
-        connection.execute(text(f"CREATE DATABASE IF NOT EXISTS `{DATABASE_NAME}`"))
-        connection.execute(text(f"USE `{DATABASE_NAME}`"))
+    try:
+        with engine.connect() as connection:
+            connection.execute(text(f"CREATE DATABASE IF NOT EXISTS `{DATABASE_NAME}`"))
+            connection.execute(text(f"USE `{DATABASE_NAME}`"))
 
-        sql_file_path = os.path.join(os.getcwd(), "database.sql")
+            sql_file_path = os.path.join(os.getcwd(), "database.sql")
 
-        if os.path.exists(sql_file_path):
-            with open(sql_file_path, "r") as file:
-                sql_statements = file.read()
-                for statement in sql_statements.split(";"):
-                    if statement.strip(): 
-                        connection.execute(text(statement.strip()))
+            if os.path.exists(sql_file_path):
+                with open(sql_file_path, "r") as file:
+                    sql_statements = file.read()
+                    for statement in sql_statements.split(";"):
+                        if statement.strip(): 
+                            connection.execute(text(statement.strip()))
+    except Exception as e:
+            print(f"Error initializing database: {e}")
