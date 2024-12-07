@@ -60,7 +60,7 @@ def send_otp(phone_number: str, db: Session = Depends(get_db)):
 
 
 
-@otp_router.post("/verify-otp")
+@otp_router.get("/verify-otp")
 def verify_otp(phone_number: str, otp: str, db: Session = Depends(get_db)):
     """
     API to verify the OTP sent to a phone number.

@@ -2,6 +2,7 @@ from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from datetime import datetime, timedelta
 from src.db import Base
 
+
 class OTPModel(Base):
     __tablename__ = "otps"
     id = Column(Integer, primary_key=True, index=True)
