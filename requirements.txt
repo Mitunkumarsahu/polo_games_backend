@@ -18,5 +18,6 @@ typing_extensions==4.12.2
 uvicorn==0.31.0
 
 python-multipart
+cryptography
 twilio
 boto3

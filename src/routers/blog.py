@@ -20,7 +20,7 @@ def read_blog(blog_id: int, db: Session = Depends(get_db)):
     return blog
 
 
-@blog_router.post("/", response_model=BlogResponse)
+@blog_router.post("/create_blogs", response_model=BlogResponse)
 def create_new_blog(blog: BlogCreate, db: Session = Depends(get_db)):
     new_blog = Blog(**blog.dict())
     db.add(new_blog)

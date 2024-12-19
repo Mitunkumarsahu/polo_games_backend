@@ -6,8 +6,17 @@ from src.routers.otp import otp_router
 from src.routers.blog import blog_router
 from src.routers.reel import reel_router
 from src.db import initialize_database
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 app.include_router(user_router, prefix="/user", tags=["Users"])
 app.include_router(image_router, prefix="/admin", tags=["Images"])
