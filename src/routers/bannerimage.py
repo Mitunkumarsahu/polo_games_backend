@@ -8,13 +8,30 @@ from src.models.bannerimage import ImageModel
 
 image_router = APIRouter()
 
+def find_lowest_available_id(db: Session) -> int:
+    """
+    Find the lowest available ID for a new image.
+    Returns 1 if no images exist, otherwise finds the first gap in the sequence.
+    """
+    existing_ids = [img.id for img in db.query(ImageModel.id).order_by(ImageModel.id).all()]
+    
+    if not existing_ids:
+        return 1
+
+    for i in range(len(existing_ids)):
+        expected_id = i + 1
+        if existing_ids[i] != expected_id:
+            return expected_id
+    
+    return len(existing_ids) + 1
+
 @image_router.post("/upload-image")
 async def upload_image(
     file: UploadFile = File(...), 
     db: Session = Depends(get_db)
 ):
     """
-    Upload a single image to the database.
+    Upload a single image to the database using the lowest available ID.
     """
     try:
         image_count = db.query(ImageModel).count()
@@ -31,7 +48,10 @@ async def upload_image(
 
         content = await file.read()
 
+        new_id = find_lowest_available_id(db)
+
         new_image = ImageModel(
+            id=new_id,
             name=file.filename,
             content=content,
             content_type=file.content_type,
@@ -39,7 +59,7 @@ async def upload_image(
         db.add(new_image)
         db.commit()
 
-        return {"message": f"Image {file.filename} uploaded successfully."}
+        return {"message": f"Image {file.filename} uploaded successfully with ID {new_id}."}
     except SQLAlchemyError as e:
         db.rollback()
         raise HTTPException(status_code=500, detail="Database error occurred.")
@@ -125,6 +145,7 @@ def delete_image(image_id: int, db: Session = Depends(get_db)):
 
         db.delete(image)
         db.commit()
+
         return {"message": "Image deleted successfully."}
     except SQLAlchemyError:
         db.rollback()
