@@ -12,7 +12,7 @@ def index(db: Session = Depends(get_db)):
 
 @user_router.get("/get_user_by_id/{id}")
 def get(id: int, db: Session = Depends(get_db)):
-    return db.query(User).filter(User.id == id).first()
+    return db.query(User).filter(User.phone_number == id).first()
 
 @user_router.post("/create_user")
 def create(payload: CreateUser, db: Session = Depends(get_db)):
