@@ -5,6 +5,8 @@ from src.routers.bannerimage import image_router
 from src.routers.otp import otp_router
 from src.routers.blog import blog_router
 from src.routers.reel import reel_router
+from src.routers.marqueetext import marqueetext_router
+from src.routers.imagelinkrouter import image_link_router
 from src.db import initialize_database
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -23,6 +25,8 @@ app.include_router(image_router, prefix="/admin", tags=["Images"])
 app.include_router(otp_router, prefix="/otp", tags=["OTP"])
 app.include_router(blog_router, prefix="/blogs", tags=["Blogs"])
 app.include_router(reel_router, prefix="/reels", tags=["Reels"])
+app.include_router(marqueetext_router, prefix="/marqueetext", tags=["MarqueeText"])
+app.include_router(image_link_router, prefix="/imagelink", tags=["ImageLink"])
 
 @app.on_event("startup")
 def startup_event():
