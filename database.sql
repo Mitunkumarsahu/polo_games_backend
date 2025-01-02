@@ -51,5 +51,13 @@ CREATE TABLE IF NOT EXISTS `image_links` (
 
 
 
+CREATE TABLE IF NOT EXISTS `visitors` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `ip_address` VARCHAR(255) NOT NULL,
+  `user_agent` VARCHAR(255),
+  `timestamp` DATETIME DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+);
+
 
 
