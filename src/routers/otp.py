@@ -1,5 +1,5 @@
 import random
-from datetime import datetime
+from datetime import datetime, timedelta
 from fastapi import FastAPI, HTTPException, Depends, APIRouter
 from sqlalchemy.orm import Session
 from twilio.rest import Client
@@ -26,6 +26,7 @@ def send_otp(phone_number: str, db: Session = Depends(get_db)):
     API to send a 6-digit OTP via Twilio SMS to a given phone number.
     """
     otp = f"{random.randint(100000, 999999)}"
+    print(f"Generated OTP: {otp}")
     
     existing_otp = db.query(OTPModel).filter(OTPModel.phone_number == phone_number).first()
     if existing_otp:

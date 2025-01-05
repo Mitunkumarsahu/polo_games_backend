@@ -4,6 +4,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
+
 load_dotenv()
 
 DATABASE_NAME = os.getenv("DB_DATABASE")
@@ -26,6 +27,7 @@ def get_db():
 def initialize_database():
     """
     Create the database (if it doesn't exist) and run the SQL script.
+    Returns True if the database is initialized successfully, False otherwise.
     """
     try:
         with engine.connect() as connection:
@@ -40,5 +42,10 @@ def initialize_database():
                     for statement in sql_statements.split(";"):
                         if statement.strip(): 
                             connection.execute(text(statement.strip()))
+        return True
     except Exception as e:
-            print(f"Error initializing database: {e}")
+        print(f"Error initializing database: {e}")
+        return False
+
+
+
