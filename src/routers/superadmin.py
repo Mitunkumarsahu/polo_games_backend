@@ -4,6 +4,8 @@ from sqlalchemy.exc import SQLAlchemyError
 from src.models.admin import Admin
 from src.schemas.admin import AdminResponse, AdminCreate
 from src.db import get_db
+from sqlalchemy.exc import IntegrityError
+
 
 superadmin_router = APIRouter()
 
@@ -54,20 +56,29 @@ def read_admin(admin_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Admin not found.")
     return admin
 
+
 @superadmin_router.post("/create_admins", response_model=AdminResponse)
 def create_new_admin(admin: AdminCreate, db: Session = Depends(get_db)):
-    """
-    Create a new admin entry using the lowest available ID.
-    """
     try:
         new_id = find_lowest_available_id(db)
-        new_admin = Admin(id=new_id, username=admin.username, password=admin.password)
+        new_admin = Admin(
+            id=new_id,
+            phone_number=admin.phone_number,
+            name=admin.name,  
+            permissions=admin.permissions,
+        )
         db.add(new_admin)
         db.commit()
-        return {"message": "Admin created successfully.", "id": new_id}
-    except SQLAlchemyError:
+        db.refresh(new_admin)  
+        return new_admin
+    except IntegrityError:
         db.rollback()
-        raise HTTPException(status_code=500, detail="Database error occurred while creating the admin.")
+        raise HTTPException(status_code=400, detail="Phone number already exists.")
+    except SQLAlchemyError as e:
+        db.rollback()
+        raise HTTPException(status_code=500, detail=f"Database error occurred: {str(e)}")
+
+
     
 @superadmin_router.delete("/{admin_id}")
 def delete_admin(admin_id: int, db: Session = Depends(get_db)):
@@ -85,7 +96,7 @@ def delete_admin(admin_id: int, db: Session = Depends(get_db)):
         db.rollback()
         raise HTTPException(status_code=500, detail="Database error occurred while deleting the admin.")
     
-@superadmin_router.put("/{admin_id}", response_model=AdminResponse)
+@superadmin_router.put("/{admin_id}")
 def update_existing_admin(admin_id: int, updated_admin: AdminCreate, db: Session = Depends(get_db)):
     """
     Update an existing admin by ID.
@@ -98,25 +109,18 @@ def update_existing_admin(admin_id: int, updated_admin: AdminCreate, db: Session
         raise HTTPException(status_code=404, detail="Admin not found.")
 
     try:
-        admin.username = updated_admin.username
-        admin.password = updated_admin.password
+        admin.name = updated_admin.name
+        admin.phone_number = updated_admin.phone_number
+        admin.permissions = updated_admin.permissions
+
         db.commit()
         return {"message": "Admin updated successfully.", "id": admin_id}
     except SQLAlchemyError:
         db.rollback()
         raise HTTPException(status_code=500, detail="Database error occurred while updating the admin.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An unexpected error occurred: {str(e)}")
     
-@superadmin_router.post("/login", response_model=AdminResponse)
-def admin_login(username: str = Query(..., min_length=1), password: str = Query(..., min_length=1), db: Session = Depends(get_db)):
-    """
-    Attempt to log in as an admin.
-    """
-    try:
-        admin = db.query(Admin).filter(Admin.username == username, Admin.password == password).first()
-    except SQLAlchemyError:
-        raise HTTPException(status_code=500, detail="Database error occurred while fetching the admin.")
-    if not admin:
-        raise HTTPException(status_code=404, detail="Admin not found.")
-    return admin
+
 
 

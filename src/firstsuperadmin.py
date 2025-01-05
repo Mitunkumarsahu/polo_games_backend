@@ -3,6 +3,13 @@ from sqlalchemy.orm import Session
 from src.db import SessionLocal
 from src.models.superadmin import SuperAdmin
 
+import os
+from dotenv import load_dotenv
+load_dotenv()
+
+FIRST_SUPERADMIN_PHONENUMBER = os.getenv("FIRST_SUPERADMIN_PHONENUMBER")
+FIRST_SUPERADMIN_NAME = os.getenv("FIRST_SUPERADMIN_NAME")
+
 
 
 def create_first_superadmin():
@@ -11,16 +18,14 @@ def create_first_superadmin():
     """
     db: Session = SessionLocal()
     try:
-        # Check if a superadmin already exists
         existing_superadmin = db.query(SuperAdmin).first()
         if existing_superadmin:
             print("SuperAdmin already exists. Skipping creation.")
             return
         
-        # Create a new superadmin
         superadmin = SuperAdmin(
-            phone_number="1234567890",  
-            name="First SuperAdmin", 
+            phone_number=FIRST_SUPERADMIN_PHONENUMBER,  
+            name=FIRST_SUPERADMIN_NAME, 
             created_at=datetime.utcnow()
         )
         db.add(superadmin)
