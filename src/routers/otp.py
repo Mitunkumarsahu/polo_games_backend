@@ -98,20 +98,21 @@ def verify_otp(phone_number: str, otp: str, db: Session = Depends(get_db)):
     
     token_data = {
         "sub": user.phone_number,
-        "name": user.name,
+        "name": user.name if role in ["Admin", "Superadmin"] else user.username,
         "role": role
     }
+
     access_token = create_access_token(data=token_data)
 
     response = {
         "message": "OTP verified successfully",
-        "name": user.name,
+        "name": user.name if role in ["Admin", "Superadmin"] else user.username,
         "phone_number": user.phone_number,
         "role": role,
         "access_token": access_token
     }
 
-    if role == "Admin" or role == "User":
+    if role == "Admin":
         response["permissions"] = user.permissions
 
     return response
