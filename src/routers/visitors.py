@@ -14,6 +14,16 @@ async def log_visitor(request: Request, db: Session = Depends(get_db)):
     try:
         client_host = request.client.host
         user_agent = request.headers.get("user-agent")
+
+        existing_visitor = db.query(Visitor).filter(
+            Visitor.ip_address == client_host,
+            Visitor.user_agent == user_agent
+        ).first()
+
+        if existing_visitor:
+            return {"message": "Visitor already logged"}
+        
+        
         visitor = Visitor(ip_address=client_host, user_agent=user_agent)
         db.add(visitor)
         db.commit()
@@ -21,6 +31,8 @@ async def log_visitor(request: Request, db: Session = Depends(get_db)):
     except SQLAlchemyError:
         db.rollback()
         raise HTTPException(status_code=500, detail="Database error occurred while logging the visitor.")
+    
+
 
 @visitor_router.get("/visitor-count")
 def get_visitor_count(db: Session = Depends(get_db)):
