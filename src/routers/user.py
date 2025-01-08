@@ -103,3 +103,50 @@ def delete_user_by_phone_number(phone_number: str, db: Session = Depends(get_db)
     except Exception as e:
         raise HTTPException(status_code=500, detail="An unexpected error occurred.")
     
+
+
+@user_router.post("/set_website_credentials/{id}")
+def set_website_credentials(
+    id: int, 
+    website_id: str, 
+    website_password: str, 
+    db: Session = Depends(get_db)
+):
+    """
+    Set the website ID and password for a specific user.
+    """
+    try:
+        user = db.query(User).filter(User.id == id).first()
+    except SQLAlchemyError:
+        raise HTTPException(status_code=500, detail="Database error occurred while retrieving the user.")
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+
+    try:
+        user.website_id = website_id
+        user.website_password = website_password
+        db.commit()
+        db.refresh(user)
+        return {"message": "Website credentials updated successfully", "status": 200}
+    except SQLAlchemyError:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Database error occurred while updating website credentials.")
+
+@user_router.get("/get_website_credentials/{id}")
+def get_website_credentials(id: int, db: Session = Depends(get_db)):
+    """
+    Retrieve the website ID and password for a specific user.
+    """
+    try:
+        user = db.query(User).filter(User.id == id).first()
+    except SQLAlchemyError:
+        raise HTTPException(status_code=500, detail="Database error occurred while retrieving the user.")
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found.")
+
+    return {
+        "website_id": user.website_id,
+        "website_password": user.website_password
+    }

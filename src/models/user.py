@@ -8,3 +8,7 @@ class User(Base):
     country_code = Column(VARCHAR(255))
     phone_number = Column(VARCHAR(255), unique=True, nullable=False)
     selected_site = Column(VARCHAR(255))
+    website_id = Column(VARCHAR(255), nullable=True)
+    website_password = Column(VARCHAR(255), nullable=True)
+
+

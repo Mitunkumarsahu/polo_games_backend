@@ -4,8 +4,11 @@ CREATE TABLE IF NOT EXISTS `Users` (
   `country_code` VARCHAR(255),
   `phone_number` VARCHAR(255) UNIQUE NOT NULL,
   `selected_site` VARCHAR(255),
+  `website_id` VARCHAR(255),
+  `website_password` VARCHAR(255),
   PRIMARY KEY (`id`)
 );
+
 
 CREATE TABLE IF NOT EXISTS `images` (
   `id` INTEGER NOT NULL AUTO_INCREMENT,
