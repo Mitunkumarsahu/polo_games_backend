@@ -1,7 +1,6 @@
 import uvicorn
 from fastapi import FastAPI
 from src.routers.user import user_router
-from src.routers.admin import admin_router
 from src.routers.superadmin import superadmin_router
 from src.routers.bannerimage import image_router
 from src.routers.otp import otp_router
@@ -15,7 +14,36 @@ from src.db import initialize_database
 from src.firstsuperadmin import create_first_superadmin
 from fastapi.middleware.cors import CORSMiddleware
 
+from fastapi.openapi.models import OAuthFlows as OAuthFlowsModel, OAuth2 as OAuth2Model
+from fastapi.openapi.utils import get_openapi
+
 app = FastAPI()
+
+
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+
+    openapi_schema = get_openapi(
+        title="Your API",
+        version="1.0.0",
+        description="API with OAuth2 Bearer Token",
+        routes=app.routes,
+    )
+
+    openapi_schema["components"]["securitySchemes"] = {
+        "OAuth2PasswordBearer": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT",
+        }
+    }
+    openapi_schema["security"] = [{"OAuth2PasswordBearer": []}]
+
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+app.openapi = custom_openapi
 
 app.add_middleware(
     CORSMiddleware,
@@ -26,9 +54,8 @@ app.add_middleware(
 )
 
 app.include_router(user_router, prefix="/user", tags=["Users"])
-app.include_router(admin_router, prefix="/admin", tags=["Admins"])
 app.include_router(superadmin_router, prefix="/superadmin", tags=["SuperAdmins"])
-app.include_router(image_router, prefix="/admin", tags=["Images"])
+app.include_router(image_router, prefix="/bannerimage", tags=["Images"])
 app.include_router(otp_router, prefix="/otp", tags=["OTP"])
 app.include_router(blog_router, prefix="/blogs", tags=["Blogs"])
 app.include_router(reel_router, prefix="/reels", tags=["Reels"])

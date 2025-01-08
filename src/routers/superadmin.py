@@ -5,6 +5,7 @@ from src.models.admin import Admin
 from src.schemas.admin import AdminResponse, AdminCreate
 from src.db import get_db
 from sqlalchemy.exc import IntegrityError
+from src.auth_dependencies import verify_role
 
 
 superadmin_router = APIRouter()
@@ -31,7 +32,7 @@ def find_lowest_available_id(db: Session) -> int:
     return len(existing_ids) + 1
 
 @superadmin_router.get("/", response_model=list[AdminResponse])
-def read_admins(db: Session = Depends(get_db)):
+def read_admins(db: Session = Depends(get_db), current_user: dict = Depends(verify_role(["Superadmin"]))):
     """
     Retrieve all admins from the database.
     """
@@ -44,7 +45,7 @@ def read_admins(db: Session = Depends(get_db)):
     return admins
 
 @superadmin_router.get("/{admin_id}", response_model=AdminResponse)
-def read_admin(admin_id: int, db: Session = Depends(get_db)):
+def read_admin(admin_id: int, db: Session = Depends(get_db), current_user: dict = Depends(verify_role(["Superadmin"]))):
     """
     Retrieve a specific admin by ID.
     """
@@ -58,7 +59,7 @@ def read_admin(admin_id: int, db: Session = Depends(get_db)):
 
 
 @superadmin_router.post("/create_admins", response_model=AdminResponse)
-def create_new_admin(admin: AdminCreate, db: Session = Depends(get_db)):
+def create_new_admin(admin: AdminCreate, db: Session = Depends(get_db), current_user: dict = Depends(verify_role(["Superadmin"]))):
     try:
         new_id = find_lowest_available_id(db)
         new_admin = Admin(
@@ -81,7 +82,7 @@ def create_new_admin(admin: AdminCreate, db: Session = Depends(get_db)):
 
     
 @superadmin_router.delete("/{admin_id}")
-def delete_admin(admin_id: int, db: Session = Depends(get_db)):
+def delete_admin(admin_id: int, db: Session = Depends(get_db), current_user: dict = Depends(verify_role(["Superadmin"]))):
     """
     Delete an admin by ID.
     """
@@ -97,7 +98,7 @@ def delete_admin(admin_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Database error occurred while deleting the admin.")
     
 @superadmin_router.put("/{admin_id}")
-def update_existing_admin(admin_id: int, updated_admin: AdminCreate, db: Session = Depends(get_db)):
+def update_existing_admin(admin_id: int, updated_admin: AdminCreate, db: Session = Depends(get_db), current_user: dict = Depends(verify_role(["Superadmin"]))):
     """
     Update an existing admin by ID.
     """

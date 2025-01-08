@@ -4,6 +4,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from typing import List
 from src.db import get_db
 from src.models.marqueetextstatement import MarqueeTextStatementModel
+from src.auth_dependencies import verify_role
 
 marqueetext_router = APIRouter()
 
@@ -28,7 +29,7 @@ def find_lowest_available_id(db: Session) -> int:
     return len(existing_ids) + 1
 
 @marqueetext_router.post("/create-statement")
-def create_statement(content: str = Query(..., min_length=1), db: Session = Depends(get_db)):
+def create_statement(content: str = Query(..., min_length=1), db: Session = Depends(get_db), current_user: dict = Depends(verify_role(["Admin", "Superadmin"]))):
     """
     Create a new text statement with the lowest available ID.
     """
@@ -73,7 +74,7 @@ def get_statement(statement_id: int, db: Session = Depends(get_db)):
     return {"id": statement.id, "content": statement.statement}
 
 @marqueetext_router.put("/update-statement/{statement_id}")
-def update_statement(statement_id: int, new_content: str = Query(..., min_length=1), db: Session = Depends(get_db)):
+def update_statement(statement_id: int, new_content: str = Query(..., min_length=1), db: Session = Depends(get_db), current_user: dict = Depends(verify_role(["Admin", "Superadmin"]))):
     """
     Update the content of an existing text statement.
     """
@@ -94,7 +95,7 @@ def update_statement(statement_id: int, new_content: str = Query(..., min_length
         raise HTTPException(status_code=500, detail="Database error occurred while updating the statement.")
 
 @marqueetext_router.delete("/delete-statement/{statement_id}")
-def delete_statement(statement_id: int, db: Session = Depends(get_db)):
+def delete_statement(statement_id: int, db: Session = Depends(get_db), current_user: dict = Depends(verify_role(["Admin", "Superadmin"]))):
     """
     Delete a text statement by ID.
     """

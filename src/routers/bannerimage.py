@@ -5,6 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from typing import List
 from src.db import get_db
 from src.models.bannerimage import ImageModel
+from src.auth_dependencies import verify_role
 
 image_router = APIRouter()
 
@@ -31,7 +32,8 @@ def find_lowest_available_id(db: Session) -> int:
 @image_router.post("/upload-image")
 async def upload_image(
     file: UploadFile = File(...), 
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(verify_role(["Admin", "Superadmin"]))
 ):
     """
     Upload a single image to the database using the lowest available ID.
@@ -118,7 +120,7 @@ def get_image(image_id: int, db: Session = Depends(get_db)):
     }
 
 @image_router.put("/update_image/{image_id}")
-def update_image_name(image_id: int, new_name: str = Query(..., min_length=1), db: Session = Depends(get_db)):
+def update_image_name(image_id: int, new_name: str = Query(..., min_length=1), db: Session = Depends(get_db), current_user: dict = Depends(verify_role(["Admin", "Superadmin"]))):
     """
     API to update the name of an existing image.
     """
@@ -139,7 +141,7 @@ def update_image_name(image_id: int, new_name: str = Query(..., min_length=1), d
         raise HTTPException(status_code=500, detail="Database error occurred while updating the image.")
 
 @image_router.delete("/delete_image/{image_id}")
-def delete_image(image_id: int, db: Session = Depends(get_db)):
+def delete_image(image_id: int, db: Session = Depends(get_db), current_user: dict = Depends(verify_role(["Admin", "Superadmin"]))):
     """
     API to delete an image by ID.
     """

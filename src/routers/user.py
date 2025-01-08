@@ -4,6 +4,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from src.db import get_db
 from src.models.user import User
 from src.schemas.user import CreateUser, UpdateUser
+from src.auth_dependencies import verify_role
 
 user_router = APIRouter()
 
@@ -49,7 +50,7 @@ def create_user(payload: CreateUser, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Database error occurred while creating the user.")
 
 @user_router.put("/update_user_by_id/{id}")
-def update_user_by_id(id: int, payload: UpdateUser, db: Session = Depends(get_db)):
+def update_user_by_id(id: int, payload: UpdateUser, db: Session = Depends(get_db), current_user: dict = Depends(verify_role(["Admin", "Superadmin"]))):
     """
     Update an existing user by their ID.
     """
@@ -80,7 +81,7 @@ def update_user_by_id(id: int, payload: UpdateUser, db: Session = Depends(get_db
     
 
 @user_router.delete("/delete_user_by_phone_number/{phone_number}")
-def delete_user_by_phone_number(phone_number: str, db: Session = Depends(get_db)):
+def delete_user_by_phone_number(phone_number: str, db: Session = Depends(get_db), current_user: dict = Depends(verify_role(["Admin", "Superadmin"]))):
     """
     Delete a user by their phone number.
     """
@@ -110,7 +111,8 @@ def set_website_credentials(
     id: int, 
     website_id: str, 
     website_password: str, 
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db), 
+    current_user: dict = Depends(verify_role(["Admin", "Superadmin"]))
 ):
     """
     Set the website ID and password for a specific user.

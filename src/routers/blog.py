@@ -4,6 +4,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from src.db import get_db
 from src.models.blog import Blog
 from src.schemas.blog import BlogCreate, BlogResponse
+from src.auth_dependencies import verify_role
 
 blog_router = APIRouter()
 
@@ -54,7 +55,7 @@ def read_blog(blog_id: int, db: Session = Depends(get_db)):
     return blog
 
 @blog_router.post("/create_blogs", response_model=BlogResponse)
-def create_new_blog(blog: BlogCreate, db: Session = Depends(get_db)):
+def create_new_blog(blog: BlogCreate, db: Session = Depends(get_db), current_user: dict = Depends(verify_role(["Admin", "Superadmin"]))):
     """
     Create a new blog entry using the lowest available ID.
     """
@@ -70,7 +71,7 @@ def create_new_blog(blog: BlogCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Database error occurred while creating the blog.")
 
 @blog_router.put("/{blog_id}", response_model=BlogResponse)
-def update_existing_blog(blog_id: int, updated_blog: BlogCreate, db: Session = Depends(get_db)):
+def update_existing_blog(blog_id: int, updated_blog: BlogCreate, db: Session = Depends(get_db), current_user: dict = Depends(verify_role(["Admin", "Superadmin"]))):
     """
     Update an existing blog by ID.
     """
@@ -93,7 +94,7 @@ def update_existing_blog(blog_id: int, updated_blog: BlogCreate, db: Session = D
         raise HTTPException(status_code=500, detail="Database error occurred while updating the blog.")
 
 @blog_router.delete("/{blog_id}")
-def delete_existing_blog(blog_id: int, db: Session = Depends(get_db)):
+def delete_existing_blog(blog_id: int, db: Session = Depends(get_db), current_user: dict = Depends(verify_role(["Admin", "Superadmin"]))):
     """
     Delete a blog entry by ID.
     """

@@ -1,9 +1,10 @@
 import aioboto3
 from botocore.exceptions import BotoCoreError, NoCredentialsError, ClientError
 from botocore.config import Config
-from fastapi import APIRouter, File, UploadFile, HTTPException
+from fastapi import APIRouter, File, UploadFile, HTTPException, Depends
 from fastapi.responses import JSONResponse
 import os
+from src.auth_dependencies import verify_role
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -19,7 +20,7 @@ if not all([AWS_ACCESS_KEY, AWS_SECRET_KEY, AWS_REGION, BUCKET_NAME]):
     raise RuntimeError("AWS configuration is incomplete. Please check environment variables.")
 
 @reel_router.post("/upload-reel/")
-async def upload_reel(file: UploadFile = File(...)):
+async def upload_reel(file: UploadFile = File(...), current_user: dict = Depends(verify_role(["Admin", "Superadmin"]))):
     """
     Upload a video file to the S3 bucket asynchronously.
     """
@@ -83,7 +84,7 @@ async def get_reels():
 
 
 @reel_router.delete("/delete-reel/{filename}")
-async def delete_reel(filename: str):
+async def delete_reel(filename: str, current_user: dict = Depends(verify_role(["Admin", "Superadmin"]))):
     """
     Delete a specific reel from the S3 bucket asynchronously.
     """

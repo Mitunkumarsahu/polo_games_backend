@@ -6,6 +6,7 @@ from src.db import get_db
 import base64
 from src.models.imagelink import ImageLink
 from src.schemas.imagelink import ImageLinkResponse
+from src.auth_dependencies import verify_role
 
 app = FastAPI()
 
@@ -39,7 +40,7 @@ def find_lowest_available_id(db: Session) -> int:
 
 
 @image_link_router.post("/create_items/", response_model=ImageLinkResponse)
-def create_item(link: str = Form(...), image: UploadFile = File(...), db: Session = Depends(get_db)):
+def create_item(link: str = Form(...), image: UploadFile = File(...), db: Session = Depends(get_db), current_user: dict = Depends(verify_role(["Admin", "Superadmin"]))):
     try:
         image_data = image_to_binary(image)  
         new_id = find_lowest_available_id(db)
@@ -90,7 +91,7 @@ def read_item(item_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail="Database error occurred while reading the item.")
 
 @image_link_router.put("/items/{item_id}", response_model=ImageLinkResponse)
-def update_item(item_id: int, link: str = Form(...), image: UploadFile = File(...), db: Session = Depends(get_db)):
+def update_item(item_id: int, link: str = Form(...), image: UploadFile = File(...), db: Session = Depends(get_db), current_user: dict = Depends(verify_role(["Admin", "Superadmin"]))):
     try:
         item = db.query(ImageLink).filter(ImageLink.id == item_id).first()
         if not item:
@@ -112,7 +113,7 @@ def update_item(item_id: int, link: str = Form(...), image: UploadFile = File(..
         raise HTTPException(status_code=500, detail="Database error occurred while updating the item.")
 
 @image_link_router.delete("/items/{item_id}", response_model=dict)
-def delete_item(item_id: int, db: Session = Depends(get_db)):
+def delete_item(item_id: int, db: Session = Depends(get_db), current_user: dict = Depends(verify_role(["Admin", "Superadmin"]))):
     try:
         item = db.query(ImageLink).filter(ImageLink.id == item_id).first()
         if not item:
