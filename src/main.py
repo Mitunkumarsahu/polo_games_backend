@@ -53,16 +53,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(user_router, prefix="/user", tags=["Users"])
-app.include_router(superadmin_router, prefix="/superadmin", tags=["SuperAdmins"])
-app.include_router(image_router, prefix="/bannerimage", tags=["Images"])
-app.include_router(otp_router, prefix="/otp", tags=["OTP"])
-app.include_router(blog_router, prefix="/blogs", tags=["Blogs"])
-app.include_router(reel_router, prefix="/reels", tags=["Reels"])
-app.include_router(marqueetext_router, prefix="/marqueetext", tags=["MarqueeText"])
-app.include_router(image_link_router, prefix="/imagelink", tags=["ImageLink"])
-app.include_router(visitor_router, prefix="/visitors", tags=["Visitors"])
-app.include_router(offer_router, prefix="/offers", tags=["Offers"])
+app.include_router(user_router, prefix="/api/user", tags=["Users"])
+app.include_router(superadmin_router, prefix="/api/superadmin", tags=["SuperAdmins"])
+app.include_router(image_router, prefix="/api/bannerimage", tags=["Images"])
+app.include_router(otp_router, prefix="/api/otp", tags=["OTP"])
+app.include_router(blog_router, prefix="/api/blogs", tags=["Blogs"])
+app.include_router(reel_router, prefix="/api/reels", tags=["Reels"])
+app.include_router(marqueetext_router, prefix="/api/marqueetext", tags=["MarqueeText"])
+app.include_router(image_link_router, prefix="/api/imagelink", tags=["ImageLink"])
+app.include_router(visitor_router, prefix="/api/visitors", tags=["Visitors"])
+app.include_router(offer_router, prefix="/api/offers", tags=["Offers"])
 
 @app.on_event("startup")
 def startup_event():
