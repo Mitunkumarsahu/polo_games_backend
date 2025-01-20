@@ -11,8 +11,10 @@ async def fetch_data(url_request: UrlRequest):
     Asynchronously fetch data from the provided URL.
     """
     try:
+        url_str = str(url_request.url)
+        
         async with httpx.AsyncClient() as client:
-            response = await client.get(url_request.url)
+            response = await client.get(url_str)
             response.raise_for_status()  
             return response.json()  
     except httpx.HTTPStatusError as http_exc:
