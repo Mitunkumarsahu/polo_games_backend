@@ -64,6 +64,7 @@ def create_new_admin(admin: AdminCreate, db: Session = Depends(get_db), current_
         new_id = find_lowest_available_id(db)
         new_admin = Admin(
             id=new_id,
+            country_code=admin.country_code,
             phone_number=admin.phone_number,
             name=admin.name,  
             permissions=admin.permissions,
@@ -111,6 +112,7 @@ def update_existing_admin(admin_id: int, updated_admin: AdminCreate, db: Session
 
     try:
         admin.name = updated_admin.name
+        admin.country_code = updated_admin.country_code
         admin.phone_number = updated_admin.phone_number
         admin.permissions = updated_admin.permissions
 

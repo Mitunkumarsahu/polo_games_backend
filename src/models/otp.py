@@ -6,6 +6,7 @@ from src.db import Base
 class OTPModel(Base):
     __tablename__ = "otps"
     id = Column(Integer, primary_key=True, index=True)
+    country_code = Column(String(5), nullable=False)
     phone_number = Column(String(15), nullable=False, unique=True)
     otp = Column(String(6), nullable=False)
     is_verified = Column(Boolean, default=False)

@@ -1,10 +1,11 @@
-from sqlalchemy import Column, Integer, String, JSON, DateTime
+from sqlalchemy import Column, Integer, String, JSON, DateTime, VARCHAR
 from datetime import datetime
 from src.db import Base
 
 class Admin(Base):
     __tablename__ = "admins"
     id = Column(Integer, primary_key=True, index=True)
+    country_code = Column(VARCHAR(255))
     phone_number = Column(String(15), unique=True, nullable=False)
     permissions = Column(
         JSON,

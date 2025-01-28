@@ -1,46 +1,46 @@
 import random
+from typing import Optional
 from datetime import datetime, timedelta
-from fastapi import FastAPI, HTTPException, Depends, APIRouter
+from fastapi import HTTPException, Depends, APIRouter
 from sqlalchemy.orm import Session
-from twilio.rest import Client
 from src.db import get_db
 from src.models.otp import OTPModel
 from src.models.superadmin import SuperAdmin
 from src.models.admin import Admin
 from src.models.user import User
 from src.jwttoken import create_access_token
+import httpx
 
 import os
 from dotenv import load_dotenv
 load_dotenv()
 
-TWILIO_ACCOUNT_SID = os.getenv("TWILIO_ACCOUNT_SID")
-TWILIO_AUTH_TOKEN = os.getenv("TWILIO_AUTH_TOKEN")
-TWILIO_PHONE_NUMBER = os.getenv("TWILIO_PHONE_NUMBER")
+
+MSG91_AUTH_KEY = os.getenv("MSG91_AUTH_KEY")
+MSG91_TEMPLATE_ID = os.getenv("MSG91_TEMPLATE_ID")
+MSG91_BASE_URL = os.getenv("MSG91_BASE_URL")
 
 otp_router = APIRouter()
 
-
-twilio_client = Client(TWILIO_ACCOUNT_SID, TWILIO_AUTH_TOKEN)
-
-
 @otp_router.post("/send-otp")
-def send_otp(phone_number: str, db: Session = Depends(get_db)):
+async def send_otp(phone_number: str, country_code: str, user_name: Optional[str] = None, db: Session = Depends(get_db)):
     """
     Search for the phone number in superadmins, admins, and users tables, then send OTP.
     """
     user = None
     for model in [SuperAdmin, Admin, User]:
-        user = db.query(model).filter(model.phone_number == phone_number).first()
+        user = db.query(model).filter(model.phone_number == phone_number, model.country_code == country_code).first()
         if user:
             break
-    
+
     if not user:
         raise HTTPException(status_code=404, detail="Phone number not found in any user tables")
+    
 
     otp = f"{random.randint(100000, 999999)}"
     print(f"Generated OTP: {otp}")
-    existing_otp = db.query(OTPModel).filter(OTPModel.phone_number == phone_number).first()
+
+    existing_otp = db.query(OTPModel).filter(OTPModel.phone_number == phone_number, OTPModel.country_code == country_code).first()
 
     try:
         if existing_otp:
@@ -48,7 +48,7 @@ def send_otp(phone_number: str, db: Session = Depends(get_db)):
             existing_otp.created_at = datetime.utcnow()
             existing_otp.expires_at = datetime.utcnow() + timedelta(minutes=5)
         else:
-            new_otp = OTPModel(phone_number=phone_number, otp=otp)
+            new_otp = OTPModel(country_code=country_code, phone_number=phone_number, otp=otp)
             db.add(new_otp)
 
         db.commit()
@@ -57,23 +57,48 @@ def send_otp(phone_number: str, db: Session = Depends(get_db)):
         raise HTTPException(status_code=500, detail=f"Failed to save OTP: {str(e)}")
 
     try:
-        twilio_client.messages.create(
-            body=f"Your OTP for logging in to Polo Games is: {otp}",
-            from_=TWILIO_PHONE_NUMBER,
-            to=phone_number
-        )
-        return {"message": "OTP sent successfully"}
+        async with httpx.AsyncClient() as client:
+            headers = {
+                "authkey": MSG91_AUTH_KEY,
+                "accept": "application/json",
+                "content-type": "application/json",
+            }
+
+            payload = {
+                "template_id": MSG91_TEMPLATE_ID,
+                "short_url": "1 (On) or 0 (Off)",
+                "short_url_expiry": "Seconds (Optional)",
+                "realTimeResponse": "1 (Optional)", 
+                "recipients": [
+                    {
+                    "mobiles": f"{country_code}{phone_number}",
+                    "var1": user_name,
+                    "var2": otp
+                    }
+                ]
+            }
+
+            response = await client.post(MSG91_BASE_URL, json=payload, headers=headers)
+
+            if response.status_code != 200:
+                print(f"Response: {response.text}")
+                raise HTTPException(status_code=500, detail="Failed to send SMS via MSG91")
+
+            response_data = response.json()
+            if response_data.get("type") != "success":
+                raise HTTPException(status_code=500, detail="MSG91 API error")
+
+            return {"message": "OTP sent successfully", "data": response_data}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to send SMS: {str(e)}")
 
 
-
 @otp_router.post("/verify-otp")
-def verify_otp(phone_number: str, otp: str, db: Session = Depends(get_db)):
+def verify_otp(phone_number: str, country_code: str, otp: str, db: Session = Depends(get_db)):
     """
     Verify OTP and return user's details with role information.
     """
-    otp_entry = db.query(OTPModel).filter(OTPModel.phone_number == phone_number).first()
+    otp_entry = db.query(OTPModel).filter(OTPModel.phone_number == phone_number, OTPModel.country_code == country_code).first()
 
     if not otp_entry:
         raise HTTPException(status_code=404, detail="Phone number not found")
@@ -95,11 +120,11 @@ def verify_otp(phone_number: str, otp: str, db: Session = Depends(get_db)):
 
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
-    
+
     token_data = {
         "sub": user.phone_number,
         "name": user.name if role in ["Admin", "Superadmin"] else user.username,
-        "role": role
+        "role": role,
     }
 
     access_token = create_access_token(data=token_data)
@@ -109,7 +134,7 @@ def verify_otp(phone_number: str, otp: str, db: Session = Depends(get_db)):
         "name": user.name if role in ["Admin", "Superadmin"] else user.username,
         "phone_number": user.phone_number,
         "role": role,
-        "access_token": access_token
+        "access_token": access_token,
     }
 
     if role == "Admin":

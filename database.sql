@@ -32,6 +32,7 @@ CREATE TABLE IF NOT EXISTS `text_statements` (
 
 CREATE TABLE IF NOT EXISTS `otps` (
   `id` INT NOT NULL AUTO_INCREMENT,
+  `country_code` VARCHAR(255),
   `phone_number` VARCHAR(15) NOT NULL UNIQUE,
   `otp` VARCHAR(6) NOT NULL,
   `is_verified` BOOLEAN DEFAULT FALSE,
@@ -87,6 +88,7 @@ CREATE TABLE IF NOT EXISTS `visitors` (
 
 CREATE TABLE IF NOT EXISTS `superadmins` (
   `id` INT NOT NULL AUTO_INCREMENT,
+  `country_code` VARCHAR(255),
   `phone_number` VARCHAR(15) NOT NULL UNIQUE,
   `name` VARCHAR(255) NOT NULL,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -96,6 +98,7 @@ CREATE TABLE IF NOT EXISTS `superadmins` (
 
 CREATE TABLE IF NOT EXISTS `admins` (
   `id` INT NOT NULL AUTO_INCREMENT,
+  `country_code` VARCHAR(255),
   `phone_number` VARCHAR(15) NOT NULL UNIQUE,
   `permissions` JSON DEFAULT NULL,
   `name` VARCHAR(255) NOT NULL,

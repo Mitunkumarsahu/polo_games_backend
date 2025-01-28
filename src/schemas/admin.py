@@ -12,6 +12,7 @@ DEFAULT_PERMISSIONS = {
 }
 
 class AdminBase(BaseModel):
+    country_code: str
     phone_number: str
     name: str
     permissions: Dict[str, Dict[str, bool]] = DEFAULT_PERMISSIONS  
