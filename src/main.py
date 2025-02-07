@@ -8,6 +8,7 @@ from src.routers.blog import blog_router
 from src.routers.reel import reel_router
 from src.routers.marqueetext import marqueetext_router
 from src.routers.imagelinkrouter import image_link_router
+from src.routers.imagelinkrouterforbackup import image_link_router_for_backup
 from src.routers.visitors import visitor_router
 from src.routers.offer import offer_router
 from src.routers.matchdata import match_router
@@ -64,6 +65,7 @@ app.include_router(blog_router, prefix="/api/blogs", tags=["Blogs"])
 app.include_router(reel_router, prefix="/api/reels", tags=["Reels"])
 app.include_router(marqueetext_router, prefix="/api/marqueetext", tags=["MarqueeText"])
 app.include_router(image_link_router, prefix="/api/imagelink", tags=["ImageLink"])
+app.include_router(image_link_router_for_backup, prefix="/api/imagelinkforbackup", tags=["ImageLink"])
 app.include_router(visitor_router, prefix="/api/visitors", tags=["Visitors"])
 app.include_router(offer_router, prefix="/api/offers", tags=["Offers"])
 app.include_router(match_router, prefix="/api/match", tags=["Match"])
