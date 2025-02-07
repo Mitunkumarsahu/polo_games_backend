@@ -12,6 +12,7 @@ from src.routers.visitors import visitor_router
 from src.routers.offer import offer_router
 from src.routers.matchdata import match_router
 from src.routers.socialmedia import socialmedia_router
+from src.routers.fantasy import fantasy_router
 from src.db import initialize_database
 from src.firstsuperadmin import create_first_superadmin
 from fastapi.middleware.cors import CORSMiddleware
@@ -66,6 +67,7 @@ app.include_router(image_link_router, prefix="/api/imagelink", tags=["ImageLink"
 app.include_router(visitor_router, prefix="/api/visitors", tags=["Visitors"])
 app.include_router(offer_router, prefix="/api/offers", tags=["Offers"])
 app.include_router(match_router, prefix="/api/match", tags=["Match"])
+app.include_router(fantasy_router, prefix="/api/fantasy", tags=["Fantasy"])
 app.include_router(socialmedia_router, prefix="/api/socialmedia", tags=["SocialMedia"])
 
 @app.on_event("startup")
