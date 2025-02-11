@@ -7,6 +7,7 @@ import base64
 from src.models.socialmedia import SocialMedia
 from src.schemas.imagelink import ImageLinkResponse
 from src.auth_dependencies import verify_role
+from typing import Optional
 
 app = FastAPI()
 
@@ -90,27 +91,39 @@ def read_item(item_id: int, db: Session = Depends(get_db)):
     except SQLAlchemyError:
         raise HTTPException(status_code=500, detail="Database error occurred while reading the item.")
 
+
+
 @socialmedia_router.put("/items/{item_id}", response_model=ImageLinkResponse)
-def update_item(item_id: int, link: str = Form(...), image: UploadFile = File(...), db: Session = Depends(get_db), current_user: dict = Depends(verify_role(["Admin", "Superadmin"]))):
+def update_item(
+    item_id: int,
+    link: Optional[str] = Form(None),
+    image: Optional[UploadFile] = File(None, description="Upload an image file or leave empty"),
+    db: Session = Depends(get_db),
+    current_user: dict = Depends(verify_role(["Admin", "Superadmin"]))
+):
     try:
         item = db.query(SocialMedia).filter(SocialMedia.id == item_id).first()
         if not item:
             raise HTTPException(status_code=404, detail="Item not found.")
-        
-        image_data = image_to_binary(image)  
-        
-        item.link = link
-        item.image = image_data  
+
+        if link is not None:
+            item.link = link  # Update link only if provided
+
+        if image is not None:
+            image_data = image_to_binary(image)
+            item.image = image_data  # Update image only if provided
         
         db.commit()
         db.refresh(item)
 
-        image_base64 = binary_to_base64(item.image)
+        image_base64 = binary_to_base64(item.image) if item.image else None
 
         return ImageLinkResponse(id=item.id, link=item.link, image_base64=image_base64)
-    
+
     except SQLAlchemyError:
         raise HTTPException(status_code=500, detail="Database error occurred while updating the item.")
+
+
 
 @socialmedia_router.delete("/items/{item_id}", response_model=dict)
 def delete_item(item_id: int, db: Session = Depends(get_db), current_user: dict = Depends(verify_role(["Admin", "Superadmin"]))):
