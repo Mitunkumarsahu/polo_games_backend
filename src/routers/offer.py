@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException, File, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, File, UploadFile, Query
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 from base64 import b64encode
 from src.db import get_db
 from src.models.offer import Offer
-from src.schemas.offer import OfferCreate, OfferResponse
+from src.schemas.offer import OfferCreate, OfferResponse, VisibilityUpdateRequest
 import base64
 from datetime import datetime
 from typing import List
@@ -155,3 +155,55 @@ def delete_offer(offer_id: int, db: Session = Depends(get_db), current_user: dic
         raise HTTPException(status_code=500, detail="Database error occurred while deleting the offer.")
     except Exception as e:
         raise HTTPException(status_code=500, detail= f"An unexpected error occurred. error: {str(e)}")
+
+
+    
+
+
+@offer_router.put("/visibility/all")
+def update_all_offers_visibility(
+    request: VisibilityUpdateRequest, 
+    db: Session = Depends(get_db), 
+    current_user: dict = Depends(verify_role(["Admin", "Superadmin"]))
+):
+    """
+    Update the visibility of all offers at once.
+    """
+    try:
+        print(request.visible)
+        db.query(Offer).update({Offer.visible: request.visible})
+        db.commit()
+        return {"message": "All offers visibility updated successfully."}
+    except SQLAlchemyError:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Database error occurred while updating offers visibility.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"An unexpected error occurred. error: {str(e)}")
+
+
+
+
+@offer_router.put("/visibility/{offer_id}")
+def update_offer_visibility(offer_id: int, visible: bool, db: Session = Depends(get_db), current_user: dict = Depends(verify_role(["Admin", "Superadmin"]))):
+    """
+    Update the visibility of an offer by ID.
+    """
+    try:
+        offer = db.query(Offer).filter(Offer.id == offer_id).first()
+    except SQLAlchemyError:
+        raise HTTPException(status_code=500, detail="Database error occurred while fetching the offer.")
+    
+    if not offer:
+        raise HTTPException(status_code=404, detail="Offer not found.")
+    
+    try:
+        offer.visible = 1 if visible else 0
+        db.commit()
+        return {"message": "Offer visibility updated successfully."}
+    except SQLAlchemyError:
+        db.rollback()
+        raise HTTPException(status_code=500, detail="Database error occurred while updating the offer visibility.")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail= f"An unexpected error occurred. error: {str(e)}")
+    
+

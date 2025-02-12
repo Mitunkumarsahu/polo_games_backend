@@ -12,3 +12,4 @@ class Offer(Base):
     valid_from = Column(DateTime, default=datetime.utcnow)
     valid_until = Column(DateTime, nullable=False)
     image_base64 = Column(Text, nullable=False) 
+    visible = Column(Integer, default=1)

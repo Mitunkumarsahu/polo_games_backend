@@ -19,3 +19,9 @@ class OfferResponse(OfferBase):
 
     class Config:
         from_attributes = True
+
+
+
+
+class VisibilityUpdateRequest(BaseModel):
+    visible: bool
