@@ -19,6 +19,15 @@ CREATE TABLE IF NOT EXISTS `images` (
 );
 
 
+CREATE TABLE IF NOT EXISTS `banner_images_mobile` (
+  `id` INTEGER NOT NULL AUTO_INCREMENT,
+  `name` VARCHAR(255) NOT NULL,
+  `content` LONGBLOB NOT NULL,
+  `content_type` VARCHAR(50) NOT NULL,
+  PRIMARY KEY (`id`)
+);
+
+
 CREATE TABLE IF NOT EXISTS `text_statements` (
   `id` INTEGER NOT NULL AUTO_INCREMENT,
   `statement` VARCHAR(255) NOT NULL,

@@ -3,6 +3,7 @@ from fastapi import FastAPI
 from src.routers.user import user_router
 from src.routers.superadmin import superadmin_router
 from src.routers.bannerimage import image_router
+from src.routers.bannerimagemobile import banner_image_router_for_mobile
 from src.routers.otp import otp_router
 from src.routers.blog import blog_router
 from src.routers.reel import reel_router
@@ -60,6 +61,7 @@ app.add_middleware(
 app.include_router(user_router, prefix="/api/user", tags=["Users"])
 app.include_router(superadmin_router, prefix="/api/superadmin", tags=["SuperAdmins"])
 app.include_router(image_router, prefix="/api/bannerimage", tags=["Images"])
+app.include_router(banner_image_router_for_mobile, prefix="/api/bannerimagemobile", tags=["Images Mobile"])
 app.include_router(otp_router, prefix="/api/otp", tags=["OTP"])
 app.include_router(blog_router, prefix="/api/blogs", tags=["Blogs"])
 app.include_router(reel_router, prefix="/api/reels", tags=["Reels"])
