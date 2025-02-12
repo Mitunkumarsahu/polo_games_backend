@@ -16,6 +16,7 @@ class OfferCreate(OfferBase):
 class OfferResponse(OfferBase):
     id: int
     image_base64: str 
+    visible: bool
 
     class Config:
         from_attributes = True
