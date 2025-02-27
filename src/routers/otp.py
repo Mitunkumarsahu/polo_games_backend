@@ -17,7 +17,8 @@ load_dotenv()
 
 
 MSG91_AUTH_KEY = os.getenv("MSG91_AUTH_KEY")
-MSG91_TEMPLATE_ID = os.getenv("MSG91_TEMPLATE_ID")
+MSG91_TEMPLATE_ID_FOR_INDIA = os.getenv("MSG91_TEMPLATE_ID_FOR_INDIA")
+MSG91_TEMPLATE_ID_FOR_OTHER_COUNTRIES = os.getenv("MSG91_TEMPLATE_ID_FOR_OTHER_COUNTRIES")
 MSG91_BASE_URL = os.getenv("MSG91_BASE_URL")
 
 otp_router = APIRouter()
@@ -65,7 +66,7 @@ async def send_otp(phone_number: str, country_code: str, user_name: Optional[str
             }
 
             payload = {
-                "template_id": MSG91_TEMPLATE_ID,
+                "template_id": MSG91_TEMPLATE_ID_FOR_INDIA if country_code == "91" else MSG91_TEMPLATE_ID_FOR_OTHER_COUNTRIES,
                 "short_url": "1 (On) or 0 (Off)",
                 "short_url_expiry": "Seconds (Optional)",
                 "realTimeResponse": "1 (Optional)", 
