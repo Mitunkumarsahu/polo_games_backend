@@ -1,4 +1,5 @@
 from sqlalchemy import *
+from datetime import datetime
 from src.db import Base
 
 class User(Base):
@@ -10,5 +11,7 @@ class User(Base):
     selected_site = Column(VARCHAR(255))
     website_id = Column(VARCHAR(255), nullable=True)
     website_password = Column(VARCHAR(255), nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow)
+
 
 

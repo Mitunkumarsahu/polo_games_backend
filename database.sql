@@ -6,6 +6,7 @@ CREATE TABLE IF NOT EXISTS `Users` (
   `selected_site` VARCHAR(255),
   `website_id` VARCHAR(255),
   `website_password` VARCHAR(255),
+  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`)
 );
 
