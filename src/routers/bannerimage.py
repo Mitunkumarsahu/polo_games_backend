@@ -49,10 +49,10 @@ async def upload_image(
     except SQLAlchemyError:
         raise HTTPException(status_code=500, detail="Database error occurred while counting images.")
 
-    if image_count >= 4:
+    if image_count >= 8:
         raise HTTPException(
             status_code=400, 
-            detail="Image limit reached. You can store up to 4 images only."
+            detail="Image limit reached. You can store up to 8 images only."
         )
 
     try:
