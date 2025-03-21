@@ -13,6 +13,7 @@ from src.routers.imagelinkrouterforbackup import image_link_router_for_backup
 from src.routers.visitors import visitor_router
 from src.routers.offer import offer_router
 from src.routers.socialmedia import socialmedia_router
+from src.routers.worldbook import world_book_router
 from src.db import initialize_database
 from src.firstsuperadmin import create_first_superadmin
 from fastapi.middleware.cors import CORSMiddleware
@@ -66,6 +67,7 @@ app.include_router(reel_router, prefix="/api/reels", tags=["Reels"])
 app.include_router(marqueetext_router, prefix="/api/marqueetext", tags=["MarqueeText"])
 app.include_router(image_link_router, prefix="/api/imagelink", tags=["ImageLink"])
 app.include_router(image_link_router_for_backup, prefix="/api/imagelinkforbackup", tags=["ImageLinkForBackup"])
+app.include_router(world_book_router, prefix="/api/worldbook", tags=["WorldBook"])
 app.include_router(visitor_router, prefix="/api/visitors", tags=["Visitors"])
 app.include_router(offer_router, prefix="/api/offers", tags=["Offers"])
 app.include_router(socialmedia_router, prefix="/api/socialmedia", tags=["SocialMedia"])
